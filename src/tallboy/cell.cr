@@ -21,11 +21,11 @@ module Tallboy
 
     def pad_data(str, width, char)
       case align
-      when Align::Left
+      when .left?
         str.ljust(width, char)
-      when Align::Right
+      when .right?
         str.rjust(width, char)
-      when Align::Center
+      when .center?
         str
           .rjust(width / 2 + str.size / 2 + 1, char)
           .ljust(width, char)

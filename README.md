@@ -1,6 +1,6 @@
 # tallboy
 
-Generate pretty ASCII based tables on the terminal for your command line programs
+Generate pretty ASCII based tables on the terminal for your command line programs. Tallboy is written in Crystal.
 
 ```tallboy
 ┌─────┬─────┬─────┐
@@ -33,7 +33,7 @@ dependencies:
 
 ## Super simple to use
 
-The core of the library is the `Tallboy::Table` class. Intended for storing data in a structured tabular form. Once data is stored rendering the table is done through `Table#render`
+The core of the library is the `Tallboy::Table` class. Intended for storing data in a structured tabular form. Once data is stored rendering the table is done through `Table#render`. Every row needs to be of equal size.
 
 ```crystal
 require "tallboy"
@@ -55,7 +55,7 @@ puts table.render
 
 ## Column spanning greatness
 
-Tallboy's key feature is column spanning through row layout. Every row needs to be of equal size.
+Tallboy's key feature is column spanning through row layout. Say you have 4 rows of data and you want the first row to span 4 columns
 
 ```crystal
 data = [
@@ -66,13 +66,22 @@ data = [
 ]
 
 table = Tallboy::Table.new(data)
-
-table.row 0, layout: [4,0,0,0] # first cell spans 4 columns, 0 means no span
+```
+Setting the first cell of the first row to span 4 columns with the layout keyword with an array representing how many columns to span.
+```crystal
+table.row 0, layout: [4,0,0,0]
+```
+Setting the first cell of the second row to span 3 columns and last cell to span 1 column 
+```crystal
 table.row 1, layout: [3,0,0,1]
+```
+Setting the third row to span 2 and 2. Cells with 0 span have no width and is not rendered
+```crystal
 table.row 2, layout: [2,0,2,0]
 
 puts table.render(row_separator: true)
 ```
+rendering the above table will get the following output
 ```
 +-----------------------+
 | 4/4                   |
@@ -87,19 +96,21 @@ puts table.render(row_separator: true)
 
 ## table style presets
 
+tallboy comes with 2 presets to render table with ascii characters or unicode characters
 ```crystal
 data = [
-  ["o", "o", "o"],
-  ["o", "o", "o"]
+  ["a", "b", "c"],
+  ["d", "e", "f"]
 ]
 
 table = Tallboy::Table.new(data)
 table.render(:unicode)
 ```
+passing `:unicode` to render to draw a table with unicode characters
 ```
 ┌───┬───┬───┐
-│ o │ o │ o │
-│ o │ o │ o │
+│ a │ b │ c │
+│ d │ e │ f │
 └───┴───┴───┘
 ```
 more examples in the examples folder 

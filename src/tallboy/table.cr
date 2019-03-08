@@ -1,10 +1,9 @@
 module Tallboy
-
   class Table
-    getter :rows 
+    getter :rows
 
     def initialize(
-      data : Array(Array(CellValue)), 
+      data : Array(Array(CellValue)),
       @rows : Array(Row) = [] of Row
     )
       validate_data!(data)
@@ -12,8 +11,8 @@ module Tallboy
     end
 
     def build_rows(data)
-      data.map do |data| 
-        Row.new(data) 
+      data.map do |data|
+        Row.new(data)
       end
     end
 
@@ -22,15 +21,27 @@ module Tallboy
     end
 
     def row_size_valid?(rows)
-      rows.all? {|row| row.size == rows.first.size }
+      rows.all? { |row| row.size == rows.first.size }
     end
 
     def row(num)
       rows[num]
     end
 
-    def row(num, layout)
+    def row(num, layout : Array(Int32))
       row(num).layout = layout
+    end
+
+    def row(num, border_bottom : Bool)
+      row(num).border_bottom = border_bottom
+    end
+
+    def row(range : Range(Int32, Int32), layout : Array(Int32))
+      range.map { |n| row(n).layout = layout }
+    end
+
+    def row(range : Range(Int32, Int32), border_bottom : Bool)
+      range.map { |n| row(n).border_bottom = border_bottom }
     end
 
     def column_count
@@ -44,7 +55,7 @@ module Tallboy
     end
 
     def column(index, align)
-      column(index).map(&.align=align)
+      column(index).map(&.align = align)
     end
 
     def column_widths : Array(Int32)
@@ -53,30 +64,25 @@ module Tallboy
       end
     end
 
-    private def max_elem_size(arr)
-      arr.map(&.size).max
-    end
-
     def render(style : Style = Style.new)
       Renderer::Basic.new(self, style).render
     end
 
-    def render(preset : Symbol = :ascii, row_separator = false)
-      style = case preset
-      when :unicode
-        Style.new(
-          border_top:     {"┌", "─", "┬", "┐"},
-          separator:      {"│", "─", "┴", "│"},
-          border_bottom:  {"└", "─", "┴", "┘"},
-          row:            {"│", " ", "│", "│"},
-          row_separator: row_separator
-        )
-      else
-        Style.new(row_separator: row_separator)
-      end
+    def render(
+      preset : Symbol = :ascii,
+      row_separator = false,
+      padding_size = 1
+    )
+      style = Style.new(
+        charset: Style::PRESET.fetch(preset, Style::ASCII),
+        row_separator: row_separator,
+        padding_size: padding_size)
+
       Renderer::Basic.new(self, style).render
     end
 
+    private def max_elem_size(arr)
+      arr.map(&.size).max
+    end
   end
-
 end

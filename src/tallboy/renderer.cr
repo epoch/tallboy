@@ -3,24 +3,26 @@ module Tallboy
     class Basic
       getter :table, :style
 
-      def initialize(
-        @table : Table, 
-        @style = Style.new
-        )
+      def initialize(@table : Table, @style = Style.new)
       end
 
       def rows
         table.rows
       end
 
+      def charset
+        style.charset
+      end
+
       def render_cell(cell, n, width)
-        lpad = style.row.pad * style.left_padding_size
-        rpad = style.row.pad * style.right_padding_size
+        lpad = charset.row.pad * style.left_padding_size
+        rpad = charset.row.pad * style.right_padding_size
         if cell.line_exists?(n)
-          content = cell.pad_data(cell.lines[n], width, style.row.pad.chars.first)
+          pad_char = charset.row.pad.chars.first
+          content = cell.pad_data(cell.lines[n], width, pad_char)
           "#{lpad}#{content}#{rpad}"
         else
-          "#{lpad}#{style.row.pad * width}#{rpad}"
+          "#{lpad}#{charset.row.pad * width}#{rpad}"
         end
       end
 
@@ -51,7 +53,7 @@ module Tallboy
         lborder, pad, mid, rborder = style.to_tuple
 
         cells = row.map_with_index do |cell, index|
-          { cell, calc_cell_width(row.layout, index, cell.span), cell.span }
+          {cell, calc_cell_width(row.layout, index, cell.span), cell.span}
         end.reject do |cell, width, span|
           span < 1
         end.map do |cell, width|
@@ -64,22 +66,21 @@ module Tallboy
       def separator?(row)
         style.row_separator || row.border_bottom?
       end
-      
+
       def rows_with_separators(rows)
         rows.reduce("") do |io, row|
-          io += row(row, style.row)
-          io += border(row, style.separator) if separator?(row)
+          io += row(row, charset.row)
+          io += border(row, charset.separator) if separator?(row)
           io
         end
       end
 
       def render
-        border(rows.first, style.border_top) +
-        rows_with_separators(rows[0..-2]) +
-        row(rows.last, style.row) +
-        border(rows.last, style.border_bottom)
+        border(rows.first, charset.border_top) +
+          rows_with_separators(rows[0..-2]) +
+          row(rows.last, charset.row) +
+          border(rows.last, charset.border_bottom)
       end
     end
-
   end
 end

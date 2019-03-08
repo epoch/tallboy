@@ -1,47 +1,51 @@
 module Tallboy
-
   class Style
-    getter :border_top
-    getter :row
-    getter :separator
-    getter :border_bottom
+    getter :charset
     getter :left_padding_size
     getter :right_padding_size
     property :row_separator
 
-    class Row
-      getter :left, :pad, :mid, :right
+    struct Charset
+      struct CharRow
+        getter :left, :pad, :mid, :right
 
-      def initialize(
-        @left : String, 
-        @pad : String, 
-        @mid : String, 
-        @right : String)
+        def initialize(
+          @left : String,
+          @pad : String,
+          @mid : String,
+          @right : String
+        )
+        end
+
+        def to_tuple
+          {left, pad, mid, right}
+        end
       end
 
-      def to_tuple
-        {left, pad, mid, right}
+      getter :border_bottom, :border_top, :separator, :row
+
+      def initialize(border_top, row, separator, border_bottom)
+        @border_top = CharRow.new(*border_top)
+        @border_bottom = CharRow.new(*border_bottom)
+        @row = CharRow.new(*row)
+        @separator = CharRow.new(*separator)
       end
-    end
 
-    class BorderTop < Row end
-    class BorderBottom < Row end
-    class Separator < Row end
+      def row=(row)
+        @row = CharRow.new(*row)
+      end
 
-    def border_top=(chars)
-      @border_top = BorderTop.new(*chars)
-    end
+      def separator=(separator)
+        @separator = CharRow.new(*separator)
+      end
 
-    def border_bottom=(chars)
-      @border_bottom = BorderBottom.new(*chars)
-    end    
+      def border_bottom=(border_bottom)
+        @border_bottom = CharRow.new(*border_bottom)
+      end
 
-    def row=(chars)
-      @row = Row.new(*chars)
-    end
-
-    def separator=(chars)
-      @separator = Separator.new(*chars)
+      def border_top=(border_top)
+        @border_top = CharRow.new(*border_top)
+      end
     end
 
     def padding_size=(size)
@@ -50,28 +54,20 @@ module Tallboy
     end
 
     def padding_size(left_size, right_size)
-      @left_padding_size, @right_padding_size = left_size, right_size 
+      @left_padding_size, @right_padding_size = left_size, right_size
     end
 
     def padding_size
-      { @left_padding_size, @right_padding_size }
+      {@left_padding_size, @right_padding_size}
     end
 
     def initialize(
-      border_top     = {"+", "-", "+", "+"},
-      row            = {"|", " ", "|", "|"},
-      separator      = {"+", "-", "+", "+"},
-      border_bottom  = {"+", "-", "+", "+"},
-      padding_size   = 1,
+      charset = ASCII,
+      padding_size = 1,
       @row_separator = false
-      )
-
-      @border_top = BorderTop.new(*border_top)
-      @row = Row.new(*row)
-      @separator = Separator.new(*separator)
-      @border_bottom = BorderBottom.new(*border_bottom)
+    )
+      @charset = Charset.new(**charset)
       @left_padding_size, @right_padding_size = padding_size, padding_size
     end
-
   end
 end

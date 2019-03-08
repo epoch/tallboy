@@ -10,21 +10,21 @@ describe Tallboy::Row do
     describe "new" do
       it "raise exception when data size does not match layout" do
         expect_raises(Tallboy::InvalidLayoutException) do
-          Tallboy::Row.new(data, layout: [4,0,0,0])    
+          Tallboy::Row.new(data, layout: [4, 0, 0, 0])
         end
       end
     end
 
     describe "map" do
       it "can enumerate with map" do
-        row = Tallboy::Row.new(data, layout: [3,0,0])
-        row.map(&.data).should eq(["a","b","c"])
+        row = Tallboy::Row.new(data, layout: [3, 0, 0])
+        row.map(&.data).should eq(["a", "b", "c"])
       end
     end
 
     describe "layout" do
       it "returns spans" do
-        row = Tallboy::Row.new(data, layout: [3,0,0])
+        row = Tallboy::Row.new(data, layout: [3, 0, 0])
         row.layout.size.should eq(3)
       end
     end
@@ -42,7 +42,7 @@ describe Tallboy::Row do
     #     row.render([1,1,1], style: style).chomp.should eq("x-a-+-b-+-c-x")
     #   end
 
-    #   context "when layout is 3 0 0" do 
+    #   context "when layout is 3 0 0" do
     #     it "render cell with spans" do
     #       row = Tallboy::Row.new(data)
     #       row.layout = [3,0,0]
@@ -53,7 +53,6 @@ describe Tallboy::Row do
   end
 
   context "when data contains new line" do
-
     data = ["a", "b\ne\ne", "c\nd"]
     table = Tallboy::Row.new(data)
 
@@ -70,12 +69,11 @@ describe Tallboy::Row do
 
     #   it "renders second line" do
     #     table.render_line(1, [1,1,1]).chomp.should eq("|   | e | d |")
-    #   end 
-      
+    #   end
+
     #   it "renders third line" do
     #     table.render_line(2, [1,1,1]).chomp.should eq("|   | e |   |")
-    #   end     
+    #   end
     # end
   end
-
 end

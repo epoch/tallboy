@@ -2,7 +2,6 @@ require "../spec_helper"
 
 describe Tallboy::Cell do
   context "data is empty string" do
-
     cell = Tallboy::Cell.new("")
 
     describe "lines" do
@@ -26,11 +25,9 @@ describe Tallboy::Cell do
         cell.line_exists?(1).should be_false
       end
     end
-
   end
 
   context "data is single line string" do
-
     cell = Tallboy::Cell.new("cake pudding")
 
     describe "line_have_content?" do
@@ -45,7 +42,6 @@ describe Tallboy::Cell do
   end
 
   context "data is multi line string" do
-
     cell = Tallboy::Cell.new("cake\npudding")
 
     describe "line_have_content?" do
@@ -57,6 +53,5 @@ describe Tallboy::Cell do
         cell.line_exists?(1).should be_true
       end
     end
-  end  
-
+  end
 end

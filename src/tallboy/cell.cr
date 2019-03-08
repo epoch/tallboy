@@ -1,10 +1,9 @@
 module Tallboy
-
   class Cell
     property :span, :data, :align
 
     def initialize(
-      @data : CellValue = "" ,
+      @data : CellValue = "",
       @span = 1,
       @align = Align::Left
     )
@@ -37,6 +36,5 @@ module Tallboy
     def line_exists?(line_num)
       line_num < lines.size
     end
-    
   end
 end

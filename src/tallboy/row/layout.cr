@@ -3,7 +3,7 @@ module Tallboy
     class Layout
       include Enumerable(Int32)
       getter :spans
-      
+
       def initialize(@column_count : Int32, @spans = [] of Int32)
         @spans = Array.new(@column_count, 1) if @spans.empty?
         raise InvalidLayoutException.new if !valid?
@@ -11,7 +11,7 @@ module Tallboy
 
       def each
         spans.each { |span| yield(span) }
-      end    
+      end
 
       def valid?
         @column_count == spans.sum

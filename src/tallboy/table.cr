@@ -64,7 +64,7 @@ module Tallboy
       end
     end
 
-    def render(style : Style = Style.new)
+    def render(style : Style)
       Renderer::Basic.new(self, style).render
     end
 

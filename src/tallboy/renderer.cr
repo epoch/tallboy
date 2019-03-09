@@ -14,16 +14,18 @@ module Tallboy
         style.charset
       end
 
+      def render_cell(width)
+        lpad = charset.row.pad * style.left_padding_size
+        rpad = charset.row.pad * style.right_padding_size
+        "#{lpad}#{charset.row.pad * width}#{rpad}"
+      end
+
       def render_cell(cell, n, width)
         lpad = charset.row.pad * style.left_padding_size
         rpad = charset.row.pad * style.right_padding_size
-        if cell.line_exists?(n)
-          pad_char = charset.row.pad.chars.first
-          content = cell.pad_data(cell.lines[n], width, pad_char)
-          "#{lpad}#{content}#{rpad}"
-        else
-          "#{lpad}#{charset.row.pad * width}#{rpad}"
-        end
+        pad_char = charset.row.pad.chars.first
+        content = cell.pad_data(cell.lines[n], width, pad_char)
+        "#{lpad}#{content}#{rpad}"
       end
 
       def calc_cell_width(layout, index, span)
@@ -44,19 +46,23 @@ module Tallboy
       def row(row, style)
         row.height.times.reduce("") do |io, n|
           io += render_row(row, style) do |cell, width|
-            render_cell(cell, n, width)
+            cell.line_exists?(n) ? render_cell(cell, n, width) : render_cell(width)
           end
+        end
+      end
+
+      def cells_with_width(row)
+        row.map_with_index do |cell, index|
+          {cell, calc_cell_width(row.layout, index, cell.span), cell.span}
+        end.reject do |_, _, span|
+          span < 1
         end
       end
 
       def render_row(row, style)
         lborder, pad, mid, rborder = style.to_tuple
 
-        cells = row.map_with_index do |cell, index|
-          {cell, calc_cell_width(row.layout, index, cell.span), cell.span}
-        end.reject do |cell, width, span|
-          span < 1
-        end.map do |cell, width|
+        cells = cells_with_width(row).map do |cell, width|
           yield cell, width
         end
 

@@ -11,9 +11,7 @@ module Tallboy
     end
 
     def build_rows(data)
-      data.map do |data|
-        Row.new(data)
-      end
+      data.map { |data| Row.new(data) }
     end
 
     def validate_data!(data)

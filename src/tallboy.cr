@@ -1,4 +1,5 @@
 require "./tallboy/style"
+require "./tallboy/style/charset"
 require "./tallboy/cell"
 require "./tallboy/table"
 require "./tallboy/renderer"

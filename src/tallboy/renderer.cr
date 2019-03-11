@@ -14,17 +14,11 @@ module Tallboy
         style.charset
       end
 
-      def render_cell(width)
-        lpad = charset.row.pad * style.left_padding_size
-        rpad = charset.row.pad * style.right_padding_size
-        "#{lpad}#{charset.row.pad * width}#{rpad}"
-      end
-
       def render_cell(cell, n, width)
         lpad = charset.row.pad * style.left_padding_size
         rpad = charset.row.pad * style.right_padding_size
         pad_char = charset.row.pad.chars.first
-        content = cell.pad_data(cell.lines[n], width, pad_char)
+        content = cell.pad_data(cell.lines[n]? || "", width, pad_char)
         "#{lpad}#{content}#{rpad}"
       end
 
@@ -46,7 +40,7 @@ module Tallboy
       def row(row, style)
         row.height.times.reduce("") do |io, n|
           io += render_row(row, style) do |cell, width|
-            cell.line_exists?(n) ? render_cell(cell, n, width) : render_cell(width)
+            render_cell(cell, n, width)
           end
         end
       end

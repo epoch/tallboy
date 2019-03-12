@@ -76,10 +76,12 @@ module Tallboy
       end
 
       def render
-        border(rows.first, charset.border_top) +
-          rows_with_separators(rows[0..-2]) +
-          row(rows.last, charset.row) +
-          border(rows.last, charset.border_bottom)
+        String.build do |str|
+          str << border(rows.first, charset.border_top)
+          str << rows_with_separators(rows[0..-2])
+          str << row(rows.last, charset.row)
+          str << border(rows.last, charset.border_bottom)
+        end
       end
     end
   end

@@ -40,7 +40,7 @@ require "tallboy"
 
 data = [
   ["a","b","c"],
-  [ 1 , 2 , 3 ]
+  ["d","e","f"]
 ]
 
 table = Tallboy::Table.new(data)
@@ -49,12 +49,14 @@ puts table.render
 ```
 +---+---+---+
 | a | b | c |
-| 1 | 2 | 3 |
+| d | e | f |
 +---+---+---+
 ```
 ## Auto cell size and alignments
 
-Columns will fit content automatically. Tallboy needs every row to have the same number of elements to work and will raise an exception when it doesn't. Setting alignments is super flexible. You can set individual cell or whole columns.
+Columns will fit content automatically. Tallboy needs every row to have the same number of elements to work otherwise will raise an exception. 
+
+Setting alignments is also super flexible. You can set individual cell or whole columns. Here we are setting the last cell in the first row to align right
 
 ```crystal
 
@@ -118,7 +120,7 @@ rendering the above table will get the following output
 
 ## table style presets
 
-tallboy comes with 2 presets to render table with ascii characters or unicode characters
+tallboy so far comes with 2 presets to render table with ascii characters or unicode characters
 ```crystal
 data = [
   ["a", "b", "c"],

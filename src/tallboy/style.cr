@@ -1,5 +1,21 @@
 module Tallboy
   class Style
+
+    PRESET = {
+      :ascii => {
+        border_top:    {"+", "-", "+", "+"},
+        row:           {"|", " ", "|", "|"},
+        separator:     {"+", "-", "+", "+"},
+        border_bottom: {"+", "-", "+", "+"},
+      },
+      :unicode => {
+        border_top:    {"┌", "─", "┬", "┐"},
+        row:           {"│", " ", "│", "│"},
+        separator:     {"│", "─", "┴", "│"},
+        border_bottom: {"└", "─", "┴", "┘"},
+      },
+    }
+
     getter :charset
     getter :left_padding_size
     getter :right_padding_size
@@ -19,7 +35,7 @@ module Tallboy
     end
 
     def initialize(
-      charset = ASCII,
+      charset = PRESET[:ascii],
       padding_size = 1,
       @row_separator = false
     )

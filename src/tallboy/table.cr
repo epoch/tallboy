@@ -72,7 +72,7 @@ module Tallboy
       padding_size = 1
     )
       style = Style.new(
-        charset: Style::PRESET.fetch(preset, Style::ASCII),
+        charset: Style::PRESET.fetch(preset, Style::PRESET[:ascii]),
         row_separator: row_separator,
         padding_size: padding_size)
 

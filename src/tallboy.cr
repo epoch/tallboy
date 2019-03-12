@@ -11,27 +11,6 @@ module Tallboy
 
   alias CellValue = String | Int::Signed | Int::Unsigned | Float32 | Float64
 
-  class Style
-    ASCII = {
-      border_top:    {"+", "-", "+", "+"},
-      row:           {"|", " ", "|", "|"},
-      separator:     {"+", "-", "+", "+"},
-      border_bottom: {"+", "-", "+", "+"},
-    }
-
-    UNICODE = {
-      border_top:    {"┌", "─", "┬", "┐"},
-      row:           {"│", " ", "│", "│"},
-      separator:     {"│", "─", "┴", "│"},
-      border_bottom: {"└", "─", "┴", "┘"},
-    }
-
-    PRESET = {
-      :ascii   => ASCII,
-      :unicode => UNICODE,
-    }
-  end
-
   class InvalidRowSizeException < Exception end
   class InvalidLayoutException < Exception end
 

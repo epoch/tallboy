@@ -63,18 +63,21 @@ Setting alignments is also super flexible. You can set individual cell or whole 
 data = [
   [1,2,3],
   ["hi", "", ""],
-  ["first", "second", "third"]
+  ["first", "second", "third"],
+  ["number one", "number two", "number three"]
 ]
 
-table.row(0).cell(2).align = Tallboy::Align::Right # last cell of first row
+table.row(0).cell(2).align = :right # align last cell of first row to right
+table.column(0, align: :right)      # align entire first column to right
 puts table.render
 ```
 ```
-+-------+--------+-------+
-| 1     | 2      |     3 |
-| hi    |        |       |
-| first | second | third |
-+-------+--------+-------+
++------------+------------+--------------+
+|          1 | 2          |            3 |
+|         hi |            |              |
+|        1st | second     | third        |
+| number one | number two | number three |
++------------+------------+--------------+
 ```
 
 ## Column spanning greatness

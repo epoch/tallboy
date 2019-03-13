@@ -19,8 +19,8 @@ table.row 1, layout: [1, 2, 0, 1]
 
 table.row 0..2, border_bottom: true
 
-table.row(0).cell(0).align = Tallboy::Align::Right
-table.row(1).cell(1).align = Tallboy::Align::Center
+table.row(0).cell(0).align = :right
+table.row(1).cell(1).align = :center
 
 puts table.render + "\n"
 
@@ -56,8 +56,20 @@ table = Tallboy::Table.new(data)
 
 table.row 1..2, layout: [3, 0, 0]
 
-table.row(1).cell(0).align = Tallboy::Align::Center
-table.row(2).cell(0).align = Tallboy::Align::Center
+table.row(1).cell(0).align = :center
+table.row(2).cell(0).align = :center
 
 puts table.render(:unicode, row_separator: true, padding_size: 2)
+
+data = [
+  [1,2,3],
+  ["hi", "", ""],
+  ["1st", "second", "third"],
+  ["number one", "number two", "number three"]
+]
+
+table = Tallboy::Table.new(data)
+table.row(0).cell(2).align = :right # last cell of first row
+table.column(0, align: :right) # align entire first column to right
+puts table.render
 

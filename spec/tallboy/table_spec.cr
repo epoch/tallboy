@@ -20,7 +20,7 @@ describe Tallboy::Table do
       end
 
       it "cell alignment has no observable effect" do
-        table.row(0).cell(0).align = Tallboy::Align::Right
+        table.row(0).cell(0).align = :right
         table.render.chomp.should eq <<-EOF
         +---+---+---+
         | a | b | c |
@@ -65,7 +65,7 @@ describe Tallboy::Table do
 
       it "with alignment updates alignment for column" do
         table.row(0).cell(1).align.should eq(Tallboy::Align::Left)
-        table.column(1, align: Tallboy::Align::Right)
+        table.column(1, align: :right)
         table.row(0).cell(1).align.should eq(Tallboy::Align::Right)
         table.row(1).cell(1).align.should eq(Tallboy::Align::Right)
       end
@@ -113,8 +113,8 @@ describe Tallboy::Table do
       end
 
       it "cell alignment has observable effect" do
-        table.row(0).cell(0).align = Tallboy::Align::Right
-        table.row(1).cell(4).align = Tallboy::Align::Center
+        table.row(0).cell(0).align = :right
+        table.row(1).cell(4).align = :center
         table.render.chomp.should eq <<-EOF
         +-----+----+------+-------+-------+
         |   1 | 12 | 123  | 1234  | 12345 |

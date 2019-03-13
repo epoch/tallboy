@@ -1,12 +1,21 @@
 module Tallboy
   class Cell
-    property :span, :data, :align
+    property :span, :data
+    getter :align
 
     def initialize(
       @data : CellValue = "",
       @span = 1,
       @align = Align::Left
     )
+    end
+
+    def align(align : Align)
+      @align = align
+    end
+
+    def align=(align : Align)
+      @align = align
     end
 
     def lines

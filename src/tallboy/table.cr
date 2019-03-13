@@ -52,7 +52,7 @@ module Tallboy
       end
     end
 
-    def column(index, align)
+    def column(index, align : Align)
       column(index).map(&.align = align)
     end
 

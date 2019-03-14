@@ -8,7 +8,7 @@ require "./tallboy/row"
 require "./tallboy/row/layout"
 
 module Tallboy
-  VERSION = "0.3.0"
+  VERSION = "0.4.0"
 
   alias CellValue = String | Int::Signed | Int::Unsigned | Float32 | Float64
 

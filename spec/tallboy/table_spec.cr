@@ -58,8 +58,8 @@ describe Tallboy::Table do
     end
 
     describe "column" do
-      it "returns array of cells" do
-        table.column(0).should be_a(Array(Tallboy::Cell))
+      it "returns a column object containing cells" do
+        table.column(0).should be_a(Tallboy::Column)
         table.column(0).first.should be_a(Tallboy::Cell)
       end
 
@@ -68,6 +68,11 @@ describe Tallboy::Table do
         table.column(1, align: :right)
         table.row(0).cell(1).align.should eq(Tallboy::Align::Right)
         table.row(1).cell(1).align.should eq(Tallboy::Align::Right)
+      end
+
+      it "alignment entire column" do
+        table.column(2).align = :center
+        table.row(0).cell(2).align.should eq Tallboy::Align::Center
       end
     end
 

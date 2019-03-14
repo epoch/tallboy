@@ -47,9 +47,7 @@ module Tallboy
     end
 
     def column(index)
-      rows.map do |row|
-        row.cell(index)
-      end
+      Column.new(rows.map { |r| r.cell(index) })
     end
 
     def column(index, align : Align)

@@ -1,6 +1,7 @@
 require "./tallboy/style"
 require "./tallboy/style/charset"
 require "./tallboy/cell"
+require "./tallboy/column"
 require "./tallboy/table"
 require "./tallboy/renderer"
 require "./tallboy/row"

@@ -14,10 +14,10 @@ Generate pretty ASCII based tables on the terminal for your command line program
 
 ## Top Features
 
-- column span
+- span cells across multiple columns
 - text alignment (left, right, center)
-- multi-line cells
-- preset & custom styling
+- multi-line cells (via the newline character)
+- preset & full custom styling
 
 ## You can totally install it as a shard
 
@@ -56,7 +56,7 @@ puts table.render
 
 Columns will fit content automatically. Tallboy needs every row to have the same number of elements to work otherwise will raise an exception. 
 
-Setting alignments is also super flexible. You can set individual cell or whole columns. Here we are setting the last cell in the first row to align right
+Setting alignments is also super flexible. You can set individual cell or whole columns. Here we are setting the last cell in the first row to align right. 
 
 ```crystal
 
@@ -68,7 +68,7 @@ data = [
 ]
 
 table.row(0).cell(2).align = :right # align last cell of first row to right
-table.column(0, align: :right)      # align entire first column to right
+table.column(0).align = :right      # align entire first column to right
 puts table.render
 ```
 ```

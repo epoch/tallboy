@@ -3,13 +3,13 @@
 Generate pretty ASCII based tables on the terminal for your command line programs. Tallboy is written in Crystal.
 
 ```tallboy
-┌─────┬─────┬─────┐
-│  o  │  o  │  o  │
-│─────┴─────┴─────│
-│        o        │
-│─────────────────│
-│        o        │
-└─────────────────┘
++-----+-----+-----+
+|  o  |  o  |  o  |
++-----+-----+-----+
+|        o        |
++-----------------+
+|        o        |
++-----------------+
 ```
 
 ## Top Features

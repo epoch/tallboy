@@ -33,7 +33,7 @@ dependencies:
 
 ## Super simple to use
 
-The core of the library is the `Tallboy::Table` class. Intended for storing data in a structured tabular form. Once data is stored rendering the table is done through `Table#render`.
+The core of the library is the `Tallboy::Table` class. Intended for storing data (nested arrays) in a structured tabular form. Once data is stored rendering the table is done through `Table#render`.
 
 ```crystal
 require "tallboy"
@@ -52,11 +52,11 @@ puts table.render
 | d | e | f |
 +---+---+---+
 ```
-## Auto cell size and alignments
+## Auto cell size and setting alignments
 
-Columns will fit content automatically. Tallboy needs every row to have the same number of elements to work otherwise will raise an exception. 
+Every row needs to have the same number of elements otherwise an exception will be raised. Columns will be calculated to fit content size automatically.
 
-Setting alignments is also super flexible. You can set individual cell or whole columns. Here we are setting the last cell in the first row to align right. 
+Setting alignments you can target individual cells or whole columns. Below we are setting the last cell in the first row to align right. And the first entire column to align right. 
 
 ```crystal
 

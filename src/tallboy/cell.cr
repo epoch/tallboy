@@ -45,5 +45,39 @@ module Tallboy
     def line_exists?(line_num)
       line_num < lines.size
     end
+
+    def wrap_text(wrap_by : Symbol, max_line_size : Int32)
+      case wrap_by
+      when :char
+        if max_line_size > 0
+          chars = @data.to_s.chars
+          wrapped_data = ""
+          chars.each_slice(max_line_size) { |slice| wrapped_data += slice.join("") + "\n" }
+          @data = wrapped_data.chomp("\n")
+        end
+      when :word
+        if max_line_size > 0
+          words = @data.to_s.split(" ")
+          wrapped_data = ""
+
+          row_size = 0
+          words.each do |w|
+            raise "Word wrapping failed, '#{w}' is bigger than max line size" if w.size > max_line_size
+            row_size += w.size
+            if row_size < max_line_size
+              wrapped_data += "#{w} "
+            else
+              wrapped_data += "\n#{w} "
+              row_size = 0
+            end
+          end
+
+          @data = wrapped_data.chomp(" ")
+        end
+      else
+        raise "Unknown wrapping type, use ':char' or ':word'"
+      end
+    end
   end
 end
+

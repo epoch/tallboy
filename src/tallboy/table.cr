@@ -80,5 +80,11 @@ module Tallboy
     private def max_elem_size(arr)
       arr.map(&.size).max
     end
+
+    def wrap_text(wrap_by : Symbol, max_line_size : Int32)
+      @rows.each do |row|
+        row.cells.each { |cell| cell.wrap_text(wrap_by, max_line_size) }
+      end
+    end
   end
 end

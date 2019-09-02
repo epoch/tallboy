@@ -62,7 +62,7 @@ module Tallboy
 
           row_size = 0
           words.each do |w|
-            raise "Word wrapping failed, '#{w}' is bigger than max line size" if w.size > max_line_size
+            raise "Word wrapping failed, '#{w}' (#{w.size}) is bigger than max line size (#{max_line_size})" if w.size > max_line_size
             row_size += w.size
             if row_size < max_line_size
               wrapped_data += "#{w} "
@@ -80,4 +80,3 @@ module Tallboy
     end
   end
 end
-

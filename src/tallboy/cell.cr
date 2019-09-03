@@ -57,7 +57,7 @@ module Tallboy
         end
       when :word
         if max_line_size > 0
-          words = @data.to_s.split(" ")
+          words = @data.to_s.gsub(/(\ |\n|\t){1,}/, " ").split(" ")
           wrapped_data = ""
 
           row_size = 0

@@ -78,7 +78,7 @@ module Tallboy
     end
 
     private def max_elem_size(arr)
-      arr.map(&.size).max
+      arr.map(&.size).max.to_i
     end
 
     def wrap_text(wrap_by : Symbol, max_line_size : Int32)

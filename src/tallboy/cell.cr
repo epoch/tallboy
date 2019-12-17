@@ -35,7 +35,7 @@ module Tallboy
         str.rjust(width, char)
       when .center?
         str
-          .rjust(width / 2 + str.size / 2 + 1, char)
+          .rjust((width / 2 + str.size / 2 + 1).to_i, char)
           .ljust(width, char)
       else
         str.ljust(width, char)

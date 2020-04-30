@@ -30,19 +30,19 @@ describe Tallboy::Style do
       style.charset.row.to_tuple.should eq({"x", "x", "x", "x"})
     end
   end
+end
 
-  describe "CharSetting" do
-    style = Tallboy::Style.new
+describe "CharSetting" do
+  style = Tallboy::Style.new
 
-    it "getters returns defaults" do
-      style.charset.separator.left.should eq("+")
-      style.charset.separator.pad.should eq("-")
-      style.charset.separator.mid.should eq("+")
-      style.charset.separator.right.should eq("+")
-    end
+  it "getters returns defaults" do
+    style.charset.separator.left.should eq("+")
+    style.charset.separator.pad.should eq("-")
+    style.charset.separator.mid.should eq("+")
+    style.charset.separator.right.should eq("+")
+  end
 
-    it "to_tuple returns character setting" do
-      style.charset.separator.to_tuple.should eq({"+", "-", "+", "+"})
-    end
+  it "to_tuple returns character setting" do
+    style.charset.separator.to_tuple.should eq({"+", "-", "+", "+"})
   end
 end

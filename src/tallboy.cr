@@ -351,7 +351,9 @@ module Tallboy
       table.each do |node_list|
         node_list.height.times do |i|
           io << node_list.map {|n| render_node(n, i) }.join 
-          io << "\n"
+          unless node_list == table.last && i == node_list.height - 1
+            io << "\n" 
+          end
         end
       end
       io

@@ -571,19 +571,15 @@ module Tallboy
       @column_def_list = ColumnDefinitionList.new
       @rows = [] of Row
     end
-
-    def header
-      header(@column_def_list.map(&.name))
-    end
-
-    def auto_header
-      header(@column_def_list.map(&.name))
-    end
-
+    
     def define_columns(auto_header = false, &block)
       with @column_def_list yield
       header(@column_def_list.map(&.name)) if auto_header
       self
+    end
+
+    def auto_header
+      header(@column_def_list.map(&.name))
     end
 
     def header(row : Array(ElemValue))
@@ -591,8 +587,7 @@ module Tallboy
     end
 
     def header(content : String, align : AlignValue = AlignOption::Auto)
-      cells = row(content, align)
-      @rows << Row.new(cells, border_bottom: true)
+      @rows << Row.new(cells(content, align), border_bottom: true)
     end
 
     def header(&block)
@@ -602,8 +597,7 @@ module Tallboy
     end   
     
     def footer(content : String, align : AlignValue = AlignOption::Auto)
-      cells = row(content, align)
-      @rows << Row.new(cells, border_top: true)
+      @rows << Row.new(cells(content, align), border_top: true)
     end
 
     def footer(row : Array(ElemValue))
@@ -614,16 +608,37 @@ module Tallboy
       row = Row.new(border_top: true)
       with row yield
       @rows << row
-    end      
-
-    def body(rows : Array(Array(ElemValue)))
-      rows[0..-2].each do |row|
-        row(row)
-      end
-      row(rows.last)
     end
 
-    def row(content, align : AlignValue = AlignOption::Auto)
+    def row(row : Array(ElemValue), border_bottom = false, border_top = false)
+      @rows << Row.new(row.map {|e| Cell.new(e) }, border_bottom, border_top)
+    end
+
+    def row(content : String)
+      @rows << Row.new(cells(content))
+    end
+
+    def row(&block)
+      row = Row.new
+      with row yield
+      @rows << row
+    end    
+    
+    def rows(rows : Array(Array(ElemValue)), divider_frequency : Int32 = 0)
+      body(rows, divider_frequency)
+    end
+
+    def body(rows : Array(Array(ElemValue)), divider_frequency : Int32 = 0)
+      rows.each_with_index do |row, idx|
+        if divider_frequency > 0 && (idx+1).divisible_by?(divider_frequency)
+          header(row)
+        else
+          row(row)
+        end
+      end
+    end
+
+    private def cells(content, align : AlignValue = AlignOption::Auto)
       if @column_def_list.empty?
         raise ColumnDefinitionRequired.new("row \"#{content}\" requires column definition") 
       end
@@ -639,22 +654,12 @@ module Tallboy
       cells << Cell.new(content, part: :tail, span: @column_def_list.size)
     end
 
-    def row(row : Array(ElemValue))
-      @rows << Row.new(row)
-    end
-
-    def row(&block)
-      row = Row.new
-      with row yield
-      @rows << row
-    end
-
-    def prev_row(idx)
+    private def prev_row(idx)
       return nil if idx == 0
       @rows[idx - 1]
     end
 
-    def next_row(idx)
+    private def next_row(idx)
       @rows[idx + 1]?
     end
 

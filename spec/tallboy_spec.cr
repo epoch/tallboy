@@ -67,19 +67,18 @@ describe Tallboy do
         cell ""
         cell "routes", span: 2
       end
-
+      
       auto_header
+
       body [
         ["create", "post", "/#{resource}"],
         ["read", "get", "/#{resource}"],
         ["update", "patch", "/#{resource}/:id"],
         ["destroy", "delete", "/#{resource}/:id"],
-      ]
-      body [
         ["read", "get", "/#{resource}/:id"],
         ["read", "get", "/#{resource}/:id/edit"],
         ["read", "get", "/#{resource}/new"],
-      ]
+      ], divider_frequency: 4
     end
 
     output = <<-IO
@@ -105,4 +104,17 @@ describe Tallboy do
 
     table.to_s.should eq(output)    
   end  
+
+  it "header auto span raise error without column definition" do
+    expect_raises(Tallboy::ColumnDefinitionRequired) do
+
+      table = Tallboy.table do
+        header "one"
+      end
+
+    end
+  end
+
+  it "" do
+  end
 end

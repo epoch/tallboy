@@ -7,6 +7,12 @@ module Tallboy
   alias WidthValue = Int32 | WidthOption
   alias AlignValue = Alignment | AlignOption
 
+  enum Preset
+    Classic
+    Unicode
+    Markdown
+  end
+
   enum Alignment
     Left
     Right
@@ -22,6 +28,9 @@ module Tallboy
   end
 
   class InvalidRowSize < Exception
+  end
+
+  class ColumnDefinitionRequired < Exception
   end
 
   class CellDefault
@@ -247,7 +256,7 @@ module Tallboy
       1
     end
 
-    def to_s(char, line = 0)
+    def render(char, line)
       char
     end
   end
@@ -256,7 +265,7 @@ module Tallboy
     def initialize(@type : NodeType, @value : String, @width : Int32)
     end
 
-    def to_s(char = "-", line = 0)
+    def render(char, line)
       char.to_s * @width
     end
   end
@@ -277,8 +286,7 @@ module Tallboy
       @value.to_s.split("\n")
     end
 
-    def to_s(char = "", num = 0)
-      
+    def render(char, num)
       with_padding(
         case @align
         when Alignment::Right
@@ -315,6 +323,7 @@ module Tallboy
       "content_left" => "│",
       "content_right" => "│",
       "content_mid" => "│",
+      "content" => "",
       "top_left" => "┌",
       "top_right" => "┐",
       "top_mid" => "┬",
@@ -326,8 +335,7 @@ module Tallboy
       "mid_left" => "├",
       "mid_right" => "┤",
       "mid_mid" => "┼",
-      "mid" => "─",
-      "space" => " "
+      "mid" => "─"
     }
 
     getter :table
@@ -340,11 +348,7 @@ module Tallboy
     end
 
     def render_node(node, i)
-      begin
-        node.to_s(@charset[node.type.to_s.underscore], i)
-      rescue KeyError
-        node.to_s("", i)
-      end
+      node.render(@charset[node.type.to_s.underscore], i)
     end
 
     def render(io = IO::Memory.new)
@@ -366,6 +370,7 @@ module Tallboy
       "content_left" => "|",
       "content_right" => "|",
       "content_mid" => "|",
+      "content" => "",
       "top_left" => "|",
       "top_right" => "|",
       "top_mid" => "-",
@@ -391,6 +396,7 @@ module Tallboy
       "content_left" => "|",
       "content_right" => "|",
       "content_mid" => "|",
+      "content" => "",
       "top_left" => "+",
       "top_right" => "+",
       "top_mid" => "+",
@@ -402,8 +408,7 @@ module Tallboy
       "mid_left" => "+",
       "mid_right" => "+",
       "mid_mid" => "+",
-      "mid" => "-",
-      "space" => " "
+      "mid" => "-"
     }
   end
 
@@ -594,7 +599,12 @@ module Tallboy
       row = Row.new(border_bottom: true)
       with row yield
       @rows << row
-    end    
+    end   
+    
+    def footer(content : String, align : AlignValue = AlignOption::Auto)
+      cells = row(content, align)
+      @rows << Row.new(cells, border_top: true)
+    end
 
     def footer(row : Array(ElemValue))
       @rows << Row.new(row.map {|c| Cell.new(c) }, border_top: true)
@@ -610,10 +620,14 @@ module Tallboy
       rows[0..-2].each do |row|
         row(row)
       end
-      header(rows.last)
+      row(rows.last)
     end
 
     def row(content, align : AlignValue = AlignOption::Auto)
+      if @column_def_list.empty?
+        raise ColumnDefinitionRequired.new("row \"#{content}\" requires column definition") 
+      end
+
       cells = [] of Cell
       (@column_def_list.size - 1).times do
         cells << Cell.new(
@@ -658,15 +672,13 @@ module Tallboy
       RenderNodesBuilder.new(self).build
     end    
 
-    def render(preset, io = IO::Memory.new)
+    def render(preset : Preset = :unicode, io = IO::Memory.new)
       case preset
-      when :classic, :ascii
+      when Preset::Classic
         ClassicRenderer.new(self.build).render(io)
-      when :markdown
+      when Preset::Markdown
         MarkdownRenderer.new(self.build).render(io)
-      when :unicode
-        BasicRenderer.new(self.build).render(io)
-      else
+      when Preset::Unicode
         BasicRenderer.new(self.build).render(io)
       end
     end

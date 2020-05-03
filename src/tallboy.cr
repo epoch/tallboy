@@ -7,8 +7,8 @@ module Tallboy
   alias WidthValue = Int32 | WidthOption
   alias AlignValue = Alignment | AlignOption
 
-  enum Preset
-    Classic
+  enum BorderStyle
+    Ascii
     Unicode
     Markdown
   end
@@ -317,9 +317,8 @@ module Tallboy
     end
   end
 
-  class BasicRenderer
-    @@charset = {
-      "dash" => "─",
+  class Renderer
+    @@border_style = {
       "content_left" => "│",
       "content_right" => "│",
       "content_mid" => "│",
@@ -342,20 +341,21 @@ module Tallboy
 
     def initialize(
       @table : Array(NodeList),
-      @charset = {} of String => String
+      @border_style = {} of String => String
     )
-      @charset = @@charset.merge(@charset)
+      @border_style = @@border_style.merge(@border_style)
     end
 
     def render_node(node, i)
-      node.render(@charset[node.type.to_s.underscore], i)
+      node.render(@border_style[node.type.to_s.underscore], i)
     end
 
     def render(io = IO::Memory.new)
       table.each do |node_list|
         node_list.height.times do |i|
-          io << node_list.map {|n| render_node(n, i) }.join 
-          unless node_list == table.last && i == node_list.height - 1
+          line = node_list.map {|n| render_node(n, i) }.join
+          io << line
+          unless node_list == table.last && i == node_list.height - 1 || line.blank?
             io << "\n" 
           end
         end
@@ -364,35 +364,29 @@ module Tallboy
     end
   end
 
-  class MarkdownRenderer < BasicRenderer
-    @@charset = {
-      "dash" => "-",
+  class MarkdownRenderer < Renderer
+    @@border_style = {
       "content_left" => "|",
       "content_right" => "|",
       "content_mid" => "|",
       "content" => "",
-      "top_left" => "|",
-      "top_right" => "|",
-      "top_mid" => "-",
-      "top" => "-",
-      "bottom_left" => "|",
-      "bottom_right" => "|",
-      "bottom_mid" => "-",
-      "bottom" => "-",
+      "top_left" => "",
+      "top_right" => "",
+      "top_mid" => "",
+      "top" => "",
+      "bottom_left" => "",
+      "bottom_right" => "",
+      "bottom_mid" => "",
+      "bottom" => "",
       "mid_left" => "|",
       "mid_right" => "|",
       "mid_mid" => "|",
       "mid" => "-"
     }
-
-    def table
-      @table[1..-2]
-    end
   end
 
-  class ClassicRenderer < BasicRenderer
-    @@charset = {
-      "dash" => "-",
+  class AsciiRenderer < Renderer
+    @@border_style = {
       "content_left" => "|",
       "content_right" => "|",
       "content_mid" => "|",
@@ -455,7 +449,7 @@ module Tallboy
     end
   end
 
-  class RenderNodesBuilder
+  class RenderListBuilder
     def initialize(@table : TableBuilder)
       @cell_defaults = @table.column_def_list.build_cell_defaults(@table.rows).as(Array(CellDefault))
     end
@@ -474,23 +468,23 @@ module Tallboy
     end
 
     def border_top(row)
-      build_nodes(:top_left, :top_right, :top_mid, row)
+      build_nodes(:top_left, :top_right, :top_mid, :top, row)
     end
 
     def border_bottom(row)
-      build_nodes(:bottom_left, :bottom_right, :bottom_mid, row)
+      build_nodes(:bottom_left, :bottom_right, :bottom_mid, :bottom, row)
     end
 
     def border_middle(row_a, row_b)
-      build_nodes(:mid_left, :mid_right, :mid_mid, row_a, row_b)
+      build_nodes(:mid_left, :mid_right, :mid_mid, :mid, row_a, row_b)
     end    
 
-    private def build_nodes(left : NodeType, right : NodeType, mid_mid : NodeType, row_a, row_b = row_a)
+    private def build_nodes(left : NodeType, right : NodeType, mid_mid : NodeType, dash : NodeType, row_a, row_b = row_a)
       nodes = NodeList.new
       nodes << Node.new(left)
 
       @cell_defaults.each_with_index do |default, idx|
-        nodes << NodeBuilder.new(:mid, row_a[idx], default).build
+        nodes << NodeBuilder.new(dash, row_a[idx], default).build
         next if idx == @cell_defaults.size - 1
 
         case { row_a[idx].part, row_b[idx].part }
@@ -499,7 +493,7 @@ module Tallboy
         when { Cell::Part::Body, Cell::Part::Tail }          
           nodes << Node.new(:top_mid)
         when { Cell::Part::Body, Cell::Part::Body }
-          nodes << Node.new(:mid)
+          nodes << Node.new(dash)
         else
           nodes << Node.new(mid_mid)
         end
@@ -567,11 +561,17 @@ module Tallboy
   class TableBuilder
     getter :rows, :column_def_list
 
+    def self.new(&block)
+      instance = new
+      with instance yield
+      instance
+    end
+
     def initialize
       @column_def_list = ColumnDefinitionList.new
       @rows = [] of Row
     end
-    
+
     def define_columns(auto_header = false, &block)
       with @column_def_list yield
       header(@column_def_list.map(&.name)) if auto_header
@@ -670,21 +670,21 @@ module Tallboy
     end
 
     def to_s(io)
-      BasicRenderer.new(self.build).render(io)
+      Renderer.new(self.build).render(io)
     end
       
     def build
-      RenderNodesBuilder.new(self).build
+      RenderListBuilder.new(self).build
     end    
 
-    def render(preset : Preset = :unicode, io = IO::Memory.new)
+    def render(preset : BorderStyle = :unicode, io = IO::Memory.new)
       case preset
-      when Preset::Classic
-        ClassicRenderer.new(self.build).render(io)
-      when Preset::Markdown
+      when BorderStyle::Ascii
+        AsciiRenderer.new(self.build).render(io)
+      when BorderStyle::Markdown
         MarkdownRenderer.new(self.build).render(io)
-      when Preset::Unicode
-        BasicRenderer.new(self.build).render(io)
+      when BorderStyle::Unicode
+        Renderer.new(self.build).render(io)
       end
     end
   end  

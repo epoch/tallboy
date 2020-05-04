@@ -42,8 +42,8 @@ module Tallboy
     )
     end
 
-    def concat(other_cell)
-      CellDefault.new(@width + 1 + other_cell.width, @align)
+    def merge(other_cell)
+      CellDefault.new(@width + other_cell.width, @align)
     end
   end
 
@@ -86,7 +86,7 @@ module Tallboy
         end
       end
 
-      min_widths = ColumnWidthChecker.new(self, rows).min_widths
+      min_widths = ColumnWidthCalculator.new(self, rows).min_widths
 
       @definitions.zip(min_widths).map do |column, width|
         case column.width
@@ -139,10 +139,6 @@ module Tallboy
     def size
       (value.size / span).ceil.to_i
     end
-
-    def concat(other_cell)
-      Cell.new(@value, @width, @align, @span, @part)
-    end
   end
 
   class Row
@@ -188,9 +184,6 @@ module Tallboy
   end
 
   class NodeBuilder
-    def self.new(type : NodeType, arr : Array({Cell, CellDefault}))
-    end
-
     def initialize(@type : NodeType, @cell : Cell, @cell_default : CellDefault)
     end
   
@@ -219,31 +212,32 @@ module Tallboy
     def build
       case @type
       when NodeType::Content
-        ContentNode.new(@type, @cell.value, width, align)
+        ContentNode.new(@type, @cell.value, width, align, @cell.span)
       else
-        DashNode.new(@type, @cell.value, width)
+        DashNode.new(@type, @cell.value, width, @cell.span)
       end
     end
   end  
 
   enum NodeType
-    TopLeft
-    TopMid
-    TopRight
-    Top
-    MidLeft
-    MidMid
-    MidRight
-    Mid
-    BottomLeft
-    BottomMid
-    BottomRight
-    Bottom
-    ContentLeft
-    ContentMid
-    ContentRight
+    CornerTopLeft
+    CornerTopRight
+    CornerBottomLeft
+    CornerBottomRight
+    EdgeTop
+    EdgeRight
+    EdgeBottom
+    EdgeLeft
+    TeeTop
+    TeeRight
+    TeeBottom
+    TeeLeft
+    DividerHorizontal
+    DividerVertical
+    JointHorizontal
+    JointVertical
+    Cross
     Content
-    Space
   end
 
   class Node
@@ -262,7 +256,7 @@ module Tallboy
   end
 
   class DashNode < Node
-    def initialize(@type : NodeType, @value : String, @width : Int32)
+    def initialize(@type : NodeType, @value : String, @width : Int32, @span : Int32)
     end
 
     def render(char, line)
@@ -271,7 +265,7 @@ module Tallboy
   end
 
   class ContentNode < Node
-    def initialize(@type : NodeType, @value : String, @width : Int32, @align : Alignment)
+    def initialize(@type : NodeType, @value : String, @width : Int32, @align : Alignment, @span : Int32)
     end
 
     def with_padding(value)
@@ -286,15 +280,24 @@ module Tallboy
       @value.to_s.split("\n")
     end
 
+    def lines(num)
+      lines[num]? || ""
+    end
+
+    def width(char)
+      (char * (@span - 1)).size + @width - PADDING
+    end
+
     def render(char, num)
+      width = width(char)
       with_padding(
         case @align
         when Alignment::Right
-          (lines[num]? || "").rjust(@width - PADDING)
+          lines(num).rjust(width)
         when Alignment::Left
-          (lines[num]? || "").ljust(@width - PADDING)
+          lines(num).ljust(width)
         else
-          (lines[num]? || "").center(@width - PADDING)
+          lines(num).center(width)
         end
       )
     end
@@ -319,22 +322,24 @@ module Tallboy
 
   class Renderer
     @@border_style = {
-      "content_left" => "│",
-      "content_right" => "│",
-      "content_mid" => "│",
-      "content" => "",
-      "top_left" => "┌",
-      "top_right" => "┐",
-      "top_mid" => "┬",
-      "top" => "─",
-      "bottom_left" => "└",
-      "bottom_right" => "┘",
-      "bottom_mid" => "┴",
-      "bottom" => "─",
-      "mid_left" => "├",
-      "mid_right" => "┤",
-      "mid_mid" => "┼",
-      "mid" => "─"
+      "corner_top_left" => "┌",
+      "corner_top_right" => "┐",
+      "corner_bottom_right" => "┘",
+      "corner_bottom_left" => "└",
+      "edge_top" => "─",
+      "edge_right" => "│",
+      "edge_bottom" => "─",
+      "edge_left" => "│",
+      "tee_top" => "┬",
+      "tee_right" => "┤",
+      "tee_bottom" => "┴",
+      "tee_left" => "├",
+      "divider_vertical" => "│",
+      "divider_horizontal" => "─",
+      "joint_horizontal" => "─",
+      "joint_vertical" => "│",
+      "cross" => "┼",
+      "content" => " "
     }
 
     getter :table
@@ -366,47 +371,51 @@ module Tallboy
 
   class MarkdownRenderer < Renderer
     @@border_style = {
-      "content_left" => "|",
-      "content_right" => "|",
-      "content_mid" => "|",
-      "content" => "",
-      "top_left" => "",
-      "top_right" => "",
-      "top_mid" => "",
-      "top" => "",
-      "bottom_left" => "",
-      "bottom_right" => "",
-      "bottom_mid" => "",
-      "bottom" => "",
-      "mid_left" => "|",
-      "mid_right" => "|",
-      "mid_mid" => "|",
-      "mid" => "-"
-    }
+      "corner_top_left" => "",
+      "corner_top_right" => "",
+      "corner_bottom_right" => "",
+      "corner_bottom_left" => "",
+      "edge_top" => "",
+      "edge_right" => "|",
+      "edge_bottom" => "",
+      "edge_left" => "|",
+      "tee_top" => "",
+      "tee_right" => "|",
+      "tee_bottom" => "|",
+      "tee_left" => "|",
+      "divider_vertical" => "|",
+      "divider_horizontal" => "-",
+      "joint_horizontal" => "-",
+      "joint_vertical" => "|",
+      "cross" => "|",
+      "content" => " "
+    }    
   end
 
   class AsciiRenderer < Renderer
     @@border_style = {
-      "content_left" => "|",
-      "content_right" => "|",
-      "content_mid" => "|",
-      "content" => "",
-      "top_left" => "+",
-      "top_right" => "+",
-      "top_mid" => "+",
-      "top" => "-",
-      "bottom_left" => "+",
-      "bottom_right" => "+",
-      "bottom_mid" => "+",
-      "bottom" => "-",
-      "mid_left" => "+",
-      "mid_right" => "+",
-      "mid_mid" => "+",
-      "mid" => "-"
+      "corner_top_left" => "+",
+      "corner_top_right" => "+",
+      "corner_bottom_right" => "+",
+      "corner_bottom_left" => "+",
+      "edge_top" => "-",
+      "edge_right" => "|",
+      "edge_bottom" => "-",
+      "edge_left" => "|",
+      "tee_top" => "+",
+      "tee_right" => "+",
+      "tee_bottom" => "+",
+      "tee_left" => "+",
+      "divider_vertical" => "|",
+      "divider_horizontal" => "-",
+      "joint_horizontal" => "-",
+      "joint_vertical" => "|",
+      "cross" => "+",
+      "content" => " "
     }
   end
 
-  class ColumnWidthChecker
+  class ColumnWidthCalculator
     def initialize(@column_def_list : ColumnDefinitionList, @rows : Array(Row))
       @rows.each do |row|
         unless row.size == @column_def_list.size
@@ -468,34 +477,42 @@ module Tallboy
     end
 
     def border_top(row)
-      build_nodes(:top_left, :top_right, :top_mid, :top, row)
+      build_nodes(:corner_top_left, :corner_top_right, :tee_top, :edge_top, :joint_horizontal, row)
     end
 
     def border_bottom(row)
-      build_nodes(:bottom_left, :bottom_right, :bottom_mid, :bottom, row)
+      build_nodes(:corner_bottom_left, :corner_bottom_right, :tee_bottom, :edge_bottom, :joint_horizontal, row)
     end
 
     def border_middle(row_a, row_b)
-      build_nodes(:mid_left, :mid_right, :mid_mid, :mid, row_a, row_b)
+      build_nodes(:tee_left, :tee_right, :cross, :divider_horizontal, :joint_horizontal, row_a, row_b)
     end    
 
-    private def build_nodes(left : NodeType, right : NodeType, mid_mid : NodeType, dash : NodeType, row_a, row_b = row_a)
+    private def build_nodes(
+      left : NodeType, 
+      right : NodeType, 
+      cross : NodeType, 
+      edge : NodeType,
+      divider : NodeType, 
+      row_a, 
+      row_b = row_a
+    )
       nodes = NodeList.new
       nodes << Node.new(left)
 
       @cell_defaults.each_with_index do |default, idx|
-        nodes << NodeBuilder.new(dash, row_a[idx], default).build
+        nodes << NodeBuilder.new(edge, row_a[idx], default).build
         next if idx == @cell_defaults.size - 1
 
         case { row_a[idx].part, row_b[idx].part }
         when { Cell::Part::Tail, Cell::Part::Body }
-          nodes << Node.new(:bottom_mid)
+          nodes << Node.new(:tee_bottom)
         when { Cell::Part::Body, Cell::Part::Tail }          
-          nodes << Node.new(:top_mid)
+          nodes << Node.new(:tee_top)
         when { Cell::Part::Body, Cell::Part::Body }
-          nodes << Node.new(dash)
-        else
-          nodes << Node.new(mid_mid)
+          nodes << Node.new(divider)
+        when { Cell::Part::Tail, Cell::Part::Tail }
+          nodes << Node.new(cross)
         end
       end
       nodes << Node.new(right)    
@@ -504,7 +521,7 @@ module Tallboy
     
     def build_content_row(row)
       nodes = NodeList.new
-      nodes << Node.new(:content_left)
+      nodes << Node.new(:edge_left)
 
       cells = [] of Cell
       defaults = [] of CellDefault
@@ -513,29 +530,22 @@ module Tallboy
 
         case cell.part
         when Cell::Part::Body
-          cells << cell          
           defaults << default
         when Cell::Part::Tail
-          cells << cell
           defaults << default
           
-          cell = cells.reduce do |cell, curr_cell|
-            cell.concat(curr_cell)
-          end
-
           default = defaults.reduce do |cell, curr_cell|
-            cell.concat(curr_cell)
+            cell.merge(curr_cell)
           end
 
-          cells = [] of Cell
           defaults = [] of CellDefault
 
           nodes << NodeBuilder.new(:content, cell, default).build
-          nodes << Node.new(:content_mid) unless idx == row.size - 1
+          nodes << Node.new(:divider_vertical) unless idx == row.size - 1
         end
       end
 
-      nodes << Node.new(:content_right)
+      nodes << Node.new(:edge_right)
       nodes
     end
 
@@ -677,8 +687,8 @@ module Tallboy
       RenderListBuilder.new(self).build
     end    
 
-    def render(preset : BorderStyle = :unicode, io = IO::Memory.new)
-      case preset
+    def render(border_style : BorderStyle = :unicode, io = IO::Memory.new)
+      case border_style
       when BorderStyle::Ascii
         AsciiRenderer.new(self.build).render(io)
       when BorderStyle::Markdown

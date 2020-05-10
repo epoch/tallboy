@@ -246,10 +246,10 @@ data = [
 # table object model
 table_object_model = Tallboy::TableBuilder.new { rows(data) }
 
-min_widths = Tallboy::MinWidthCalculator.new(t3).calculate
+min_widths = Tallboy::MinWidthCalculator.new(table_object_model).calculate
 
 # object model with resolved widths
-computed_table = Tallboy::ComputedTableBuilder.new(t3, min_widths).build
+computed_table = Tallboy::ComputedTableBuilder.new(table_object_model, min_widths).build
 
 # render tree
 render_tree = Tallboy::RenderTreeBuilder.new(computed_table).build

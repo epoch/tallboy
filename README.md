@@ -1,25 +1,94 @@
 # tallboy
 
-Generate pretty ASCII based tables on the terminal for your command line programs. Tallboy is written in Crystal.
+Generate pretty ASCII, Unicode & Markdown tables on the terminal for your command line programs. 
 
-```tallboy
-+-----+-----+-----+
-|  o  |  o  |  o  |
-+-----+-----+-----+
-|        o        |
-+-----------------+
-|        o        |
-+-----------------+
+[tallboy](https://github.com/epoch/tallboy) is a DSL for quickly creating text based tables in [Crystal](https://crystal-lang.org/).
+
+## Quick start
+```crystal
+table = Tallboy.table do
+  header ["name", "hex"]
+  row ["mistyrose",       "#ffe4e1"],
+  row ["darkolivegreen",  "#556b2f"],
+  row ["papayawhip",      "#ffefd5"]
+end
+
+puts table
+```
+```
+┌────────────────┬─────────┐
+│ name           │ hex     │
+├────────────────┼─────────┤
+│ mistyrose      │ #ffe4e1 │
+│ darkolivegreen │ #556b2f │
+│ papayawhip     │ #ffefd5 │
+└────────────────┴─────────┘
+```
+```crystal
+# full API
+
+table = Tallboy.table do
+  # define 3 columns. set first column width to 12 & align right 
+  columns do 
+    add "size", width: 12, align: :right
+    add "http method"
+    add "path"
+  end
+
+  # add header with multiple lines
+  header "good\nfood\nhunting", align: :right
+
+  # add header with column span on one cell
+  header do
+    cell ""
+    cell "routes", span: 2
+  end
+  
+  # add header inferred from column definitions
+  # [size, http method, path]
+  header
+
+  rows [
+    ["207 B", "post", "/dishes"],
+    ["1.3 kB", "get", "/dishes"],
+    ["910 B", "patch", "/dishes/:id"],
+    ["10.2 kB", "delete", "/dishes/:id"],
+  ]
+end
+
+puts table
+```
+```
+┌────────────────────────────────────────┐
+│                                   good │
+│                                   food │
+│                                hunting │
+├────────────┬───────────────────────────┤
+│            │ routes                    │
+├────────────┼─────────────┬─────────────┤
+│       size │ http method │ path        │
+├────────────┼─────────────┼─────────────┤
+│      207 B │ post        │ /dishes     │
+│     1.3 kB │ get         │ /dishes     │
+│      910 B │ patch       │ /dishes/:id │
+│    10.2 kB │ delete      │ /dishes/:id │
+└────────────┴─────────────┴─────────────┘
+
+# look at those beautiful table joins!
 ```
 
 ## Top Features
 
-- span cells across multiple columns
+- spanning cells across muliple columns and entire rows
+- simple, readable and flexible API
 - text alignment (left, right, center)
-- multi-line cells (via the newline character)
-- preset & full custom styling
+- set width and alignment for entire columns with column definitions
+- static type checking for table declarations powered by Crystal
+- correctly handle multi-line cells with the newline character
+- full custom styling or choose from multiple border styles including ascii, unicode and markdown
+- render directly into IO for better performance
 
-## You can totally install it as a shard
+## Install it as a shard
 
 1. Add the dependency to your `shard.yml`:
 
@@ -31,125 +100,171 @@ dependencies:
 
 2. Run `shards install`
 
-## Super simple to use
+## Simple tutorial
 
-The core of the library is the `Tallboy::Table` class. Intended for storing data (nested arrays) in a structured tabular form. Once data is stored rendering the table is done through `Table#render`.
-
-```crystal
-require "tallboy"
-
-data = [
-  ["a","b","c"],
-  ["d","e","f"]
-]
-
-table = Tallboy::Table.new(data)
-puts table.render
-```
-```
-+---+---+---+
-| a | b | c |
-| d | e | f |
-+---+---+---+
-```
-## Auto cell size and setting alignments
-
-Every row needs to have the same number of elements otherwise an exception will be raised. Columns will be calculated to fit content size automatically.
-
-Setting alignments you can target individual cells or whole columns. Below we are setting the last cell in the first row to align right. And the first entire column to align right. 
+1. create a table with `Tallboy.table`
 
 ```crystal
+table = Tallboy.table do
+end
+```
 
+2. define columns. here we will define a 4 column table with `columns`.
+
+```crystal
+table = Tallboy.table do
+  columns do
+    add "id"
+    add "name"
+    add "description"
+    add "price
+  end
+end
+```
+
+3. add rows. you can add single row with `row` or nested arrays with `rows`. values can be strings, integers or floats.
+
+```crystal
+table = Tallboy.table do
+  columns do
+    add "id"
+    add "name"
+    add "description"
+    add "price"
+  end
+
+  rows [
+    [1, "cake", "goes well with pudding", 3.4],
+    [2, "pudding", "so good with cake!", 12.5],
+    [3, "burger", "from the reburgulator", 22.9],
+    [4, "chips", "wait you mean fries?", 5],
+  ]
+end
+```
+
+4. add header. we can manually add header with `header` with arguments or pass no arguments to inferred from column definitions. header is just a row with a border below.
+
+```crystal
+table = Tallboy.table do
+  columns do
+    add "id"
+    add "name"
+    add "description"
+    add "price"
+  end
+
+  auto_header
+  rows [
+    [1, "cake", "goes well with pudding", 3.4],
+    [2, "pudding", "so good with cake!", 12.5],
+    [3, "burger", "from the reburgulator", 22.9],
+    [4, "chips", "wait you mean fries?", 5],
+  ]
+end
+```
+
+5. add footer. we can add footer with `footer`. footer is a row with border on top. If we pass a string instead of an array it will auto span all 4 columns based on the other rows defined in this table. nice! :)
+
+```crystal
+table = Tallboy.table do
+  columns do
+    add "id"
+    add "name"
+    add "description"
+    add "price"
+  end
+  header
+  rows [
+    [1, "cake", "goes well with pudding", 3.4],
+    [2, "pudding", "so good with cake!", 12.5],
+    [3, "burger", "from the reburgulator", 22.9],
+    [4, "chips", "wait you mean fries?", 5],
+  ]
+  footer "43.8"
+end
+```
+
+6. set column span, widths and aligments. `header`, `row` and `footer` also take blocks. here we can set column span on a cell within the footer.
+
+```crystal
+table = Tallboy.table do
+  columns do
+    add "id"
+    add "name"
+    add "description"
+    add "price"
+  end
+  auto_header
+  rows [
+    [1, "cake", "goes well with pudding", 3.4],
+    [2, "pudding", "so good with cake!", 12.5],
+    [3, "burger", "from the reburgulator", 22.9],
+    [4, "chips", "wait you mean fries?", 5],
+  ]
+  footer "43.8" do
+    cell "total", span: 3
+    cell "43.8"
+  end
+end
+```
+
+7. render with different border styles.
+
+```crystal
+puts table.render # defaults to unicode
+puts table.render(:ascii) # classic look
+puts table.render(:markdown) # markdown does not support column spans and outer edge borders
+```
+
+8. tallboy supports rendering into custom IO
+
+```crystal
+puts(
+  Tallboy.table do
+    row [1,2,3]
+  end
+)
+```
+
+9. Most components in tallboy can be invoked separately. The design philosophy is inspired by how web browsers render HTML.
+
+```
+┌───────────────────────────────────────────────────────────┐
+│                  web browser vs tallboy                   │
+├───────────────────────────────────────────────────────────┤
+│ HTML ──> Document Object Model ──> render tree ──> pixels │
+│ DSL  ──> Table Object Model    ──> render tree ──> text   │
+└───────────────────────────────────────────────────────────┘
+```
+
+```crystal
 data = [
   [1,2,3],
-  ["hi", "", ""],
-  ["first", "second", "third"],
-  ["number one", "number two", "number three"]
+  [4,5,6]
 ]
 
-table.row(0).cell(2).align = :right # align last cell of first row to right
-table.column(0).align = :right      # align entire first column to right
-puts table.render
-```
-```
-+------------+------------+--------------+
-|          1 | 2          |            3 |
-|         hi |            |              |
-|        1st | second     | third        |
-| number one | number two | number three |
-+------------+------------+--------------+
+# table object model
+table_object_model = Tallboy::TableBuilder.new { rows(data) }
+
+min_widths = Tallboy::MinWidthCalculator.new(t3).calculate
+
+# object model with resolved widths
+computed_table = Tallboy::ComputedTableBuilder.new(t3, min_widths).build
+
+# render tree
+render_tree = Tallboy::RenderTreeBuilder.new(computed_table).build
+
+# text
+str = Tallboy::Renderer.new(render_tree).render
+
 ```
 
-## Column spanning greatness
+## API
 
-Tallboy's key feature is column spanning through row layout. Say you have 4 rows of data and you want the first row to span 4 columns
-
-```crystal
-data = [
-  ["4/4", "",    "",    ""   ],
-  ["3/4", "",    "",    "1/4"],
-  ["2/4", "",    "2/4", ""   ],
-  ["1/4", "1/4", "1/4", "1/4"]
-]
-
-table = Tallboy::Table.new(data)
-```
-Setting the first cell of the first row to span 4 columns with the layout keyword with an array representing how many columns to span.
-```crystal
-table.row 0, layout: [4,0,0,0]
-```
-Setting the first cell of the second row to span 3 columns and last cell to span 1 column 
-```crystal
-table.row 1, layout: [3,0,0,1]
-```
-Setting the third row to span 2 and 2. Cells with 0 span have no width and is not rendered
-```crystal
-table.row 2, layout: [2,0,2,0]
-
-puts table.render(row_separator: true)
-```
-rendering the above table will get the following output
-```
-+-----------------------+
-| 4/4                   |
-+-----------------------+
-| 3/4             | 1/4 |
-+-----------------+-----+
-| 2/4       | 2/4       |
-+-----------+-----------+
-| 1/4 | 1/4 | 1/4 | 1/4 |
-+-----+-----+-----+-----+
-```
-
-## table style presets
-
-tallboy so far comes with 2 presets to render table with ascii characters or unicode characters
-```crystal
-data = [
-  ["a", "b", "c"],
-  ["d", "e", "f"]
-]
-
-table = Tallboy::Table.new(data)
-table.render(:unicode)
-```
-passing `:unicode` to render to draw a table with unicode characters
-```
-┌───┬───┬───┐
-│ a │ b │ c │
-│ d │ e │ f │
-└───┴───┴───┘
-```
 more examples in the examples folder 
 
 ## Contributing
 
-1. Fork it (https://github.com/epoch/tallboy/fork)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
-
-## Contributors
+Issues and pull requests are welcome on GitHub at (https://github.com/epoch/tallboy)
 
 - [Daniel Tsui](https://github.com/epoch) - creator and maintainer

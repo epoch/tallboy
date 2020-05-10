@@ -26,13 +26,13 @@ describe Tallboy do
 
   it "draws table with column definitions" do
     table = Tallboy.table do
-      define_columns(auto_header: true) do
+      columns(header: true) do
         add "name"
         add "hex"
         add "number of likes", align: :right
       end
     
-      body [
+      rows [
         ["mistyrose", "#ffe4e1", 1024],
         ["mintcream", "#f5fffa", 32],
         ["papayawhip", "#ffefd5", 128],
@@ -55,7 +55,7 @@ describe Tallboy do
   it "draws advance table with column span and newlines" do
     resource = "dishes"
     table = Tallboy.table do
-      define_columns do
+      columns do
         add "CRUD", width: 12
         add "http method"
         add "path"
@@ -67,10 +67,10 @@ describe Tallboy do
         cell ""
         cell "routes", span: 2
       end
-      
-      auto_header
 
-      body [
+      header
+
+      rows [
         ["create", "post", "/#{resource}"],
         ["read", "get", "/#{resource}"],
         ["update", "patch", "/#{resource}/:id"],
@@ -78,7 +78,7 @@ describe Tallboy do
         ["read", "get", "/#{resource}/:id"],
         ["read", "get", "/#{resource}/:id/edit"],
         ["read", "get", "/#{resource}/new"],
-      ], divider_frequency: 4
+      ]
     end
 
     output = <<-IO
@@ -95,7 +95,6 @@ describe Tallboy do
     │ read       │ get         │ /dishes          │
     │ update     │ patch       │ /dishes/:id      │
     │ destroy    │ delete      │ /dishes/:id      │
-    ├────────────┼─────────────┼──────────────────┤
     │ read       │ get         │ /dishes/:id      │
     │ read       │ get         │ /dishes/:id/edit │
     │ read       │ get         │ /dishes/new      │
@@ -105,16 +104,4 @@ describe Tallboy do
     table.to_s.should eq(output)    
   end  
 
-  it "header auto span raise error without column definition" do
-    expect_raises(Tallboy::ColumnDefinitionRequired) do
-
-      table = Tallboy.table do
-        header "one"
-      end
-
-    end
-  end
-
-  it "" do
-  end
 end

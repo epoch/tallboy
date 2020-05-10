@@ -153,7 +153,7 @@ table = Tallboy.table do
     add "price"
   end
 
-  auto_header
+  header
   rows [
     [1, "cake", "goes well with pudding", 3.4],
     [2, "pudding", "so good with cake!", 12.5],
@@ -194,7 +194,7 @@ table = Tallboy.table do
     add "description"
     add "price"
   end
-  auto_header
+  header
   rows [
     [1, "cake", "goes well with pudding", 3.4],
     [2, "pudding", "so good with cake!", 12.5],
@@ -226,7 +226,7 @@ puts(
 )
 ```
 
-9. Most components in tallboy can be invoked separately. The design philosophy is inspired by how web browsers render HTML.
+9. Most components in tallboy can be invoked separately. The design philosophy is inspired by how web browsers renders HTML.
 
 ```
 ┌───────────────────────────────────────────────────────────┐

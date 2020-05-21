@@ -4,7 +4,6 @@ module Tallboy
   PADDING_LEFT = 1
   PADDING_RIGHT = 1
 
-  alias ValueType = String | Int32 | Float32 | Float64
   alias WidthValue = Int32 | WidthOption
   alias AlignValue = Alignment | AlignOption
   alias Node = Text | Line | Joint | MergedNode
@@ -58,29 +57,20 @@ module Tallboy
   end
 
   struct Cell
-    @value : ValueType
-    getter :span, :part, :align
+    getter :span, :part, :align, :value
 
-    def initialize(@value, @align : AlignValue = AlignOption::Auto, @part : Part = :tail, @span = 1)
-    end
-    
-    def value
-      @value.to_s
+    def initialize(@value : String, @align : AlignValue = AlignOption::Auto, @part : Part = :tail, @span = 1)
     end
 
     def size
-      @value.to_s.size
+      @value.size
     end
   end
 
   struct AutoSpanRow
-    getter :align, :border
+    getter :align, :border, :value
     
-    def initialize(@value : ValueType, @align : AlignValue, @border : Border = :none)
-    end
-
-    def value
-      @value.to_s
+    def initialize(@value : String, @align : AlignValue, @border : Border = :none)
     end
 
     def size() 1; end
@@ -95,9 +85,9 @@ module Tallboy
 
     def cell(value, span : Int32 = 1, align : AlignValue = AlignOption::Auto)
       (span - 1).times do
-        @cells << Cell.new(value, span: span, part: :body, align: align)
+        @cells << Cell.new(value.to_s, span: span, part: :body, align: align)
       end
-      @cells << Cell.new(value, span: span, part: :tail, align: align)
+      @cells << Cell.new(value.to_s, span: span, part: :tail, align: align)
     end
 
     def size
@@ -138,12 +128,12 @@ module Tallboy
       header(@columns.map(&.name))
     end
 
-    def row(arr : Array(ValueType), border : Border = :none)
-      @rows << Row.new(arr.map {|elem| Cell.new(elem) }, border)
+    def row(arr : Array, border : Border = :none)
+      @rows << Row.new(arr.map {|elem| Cell.new(elem.to_s) }, border)
     end
 
-    def row(value : ValueType, align : AlignValue = AlignOption::Auto, border : Border = :none)
-      @rows << AutoSpanRow.new(value, align, border)
+    def row(value, align : AlignValue = AlignOption::Auto, border : Border = :none)
+      @rows << AutoSpanRow.new(value.to_s, align, border)
     end
 
     def row(border : Border = :none, &block)
@@ -152,18 +142,18 @@ module Tallboy
       @rows << row
     end
 
-    def rows(rows : Array(Array(ValueType)))
+    def rows(rows : Array(Array))
       rows.each do |row|
         row(row)
       end
     end
 
-    def header(arr : Array(ValueType))
+    def header(arr : Array)
       row(arr, Border::Bottom)
     end
 
-    def header(value : ValueType, align : AlignValue = AlignOption::Auto)
-      row(value, align: align, border: :bottom)
+    def header(value, align : AlignValue = AlignOption::Auto)
+      row(value.to_s, align: align, border: :bottom)
     end
 
     def header(&block)
@@ -172,11 +162,11 @@ module Tallboy
       @rows << row
     end
 
-    def footer(arr : Array(ValueType))
+    def footer(arr : Array)
       row(arr, Border::Top)
     end
 
-    def footer(value : ValueType, align : AlignValue = AlignOption::Auto)
+    def footer(value, align : AlignValue = AlignOption::Auto)
       row(value, align, :top)
     end
 
@@ -205,13 +195,13 @@ module Tallboy
       ).build
     end
     
-    def render(border_style : BorderStyle, io = IO::Memory.new)
+    def render(border_style : BorderStyle = :unicode, io = IO::Memory.new)
       case border_style
       when BorderStyle::Ascii
         AsciiRenderer.new(self.build).render(io)
       when BorderStyle::Markdown
         MarkdownRenderer.new(self.build).render(io)
-      else
+      when BorderStyle::Unicode
         Renderer.new(self.build).render(io)
       end
     end
@@ -248,11 +238,10 @@ module Tallboy
   end
 
   struct ComputedCell
-    @value : ValueType
     @width : Int32
     getter :value, :width, :part, :align
 
-    def initialize(@value, @width, @part : Part = :tail, @align : Alignment = :left, @span = 1)
+    def initialize(@value : String, @width, @part : Part = :tail, @align : Alignment = :left, @span = 1)
     end
 
     def inspect
@@ -495,8 +484,10 @@ module Tallboy
 
   class NodeList
     include Enumerable(Node)
+    @nodes : Array(Node)
 
-    def initialize(@nodes = Array(Node).new)
+    def initialize(nodes : Array)
+      @nodes = nodes.map(&.as(Node))
     end
 
     def <<(node)
@@ -552,7 +543,7 @@ module Tallboy
         end.tap do |nodes|
           nodes.unshift Joint.new(type: "edge_left")
           nodes.push Joint.new(type: "edge_right")
-        end.map(&.as(Node))
+        end #.map(&.as(Node))
       )
     end
 

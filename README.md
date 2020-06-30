@@ -8,8 +8,8 @@ Generate pretty ASCII, Unicode & Markdown tables on the terminal for your comman
 ```crystal
 table = Tallboy.table do
   header ["name", "hex"]
-  row ["mistyrose",       "#ffe4e1"],
-  row ["darkolivegreen",  "#556b2f"],
+  row ["mistyrose",       "#ffe4e1"]
+  row ["darkolivegreen",  "#556b2f"]
   row ["papayawhip",      "#ffefd5"]
 end
 

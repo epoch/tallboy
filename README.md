@@ -201,7 +201,7 @@ table = Tallboy.table do
     [3, "burger", "from the reburgulator", 22.9],
     [4, "chips", "wait you mean fries?", 5],
   ]
-  footer "43.8" do
+  footer do
     cell "total", span: 3
     cell "43.8"
   end

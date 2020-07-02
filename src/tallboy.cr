@@ -59,7 +59,7 @@ module Tallboy
   struct Cell
     getter :span, :part, :align, :value
 
-    def initialize(@value : String, @align : AlignValue = AlignOption::Auto, @part : Part = :tail, @span = 1)
+    def initialize(@value : String, @align : AlignValue = :auto, @part : Part = :tail, @span = 1)
     end
 
     def size
@@ -83,7 +83,7 @@ module Tallboy
     def initialize(@cells = [] of Cell, @border : Border = :none)
     end
 
-    def cell(value, span : Int32 = 1, align : AlignValue = AlignOption::Auto)
+    def cell(value, span : Int32 = 1, align : AlignValue = :auto)
       (span - 1).times do
         @cells << Cell.new(value.to_s, span: span, part: :body, align: align)
       end
@@ -132,7 +132,7 @@ module Tallboy
       @rows << Row.new(arr.map {|elem| Cell.new(elem.to_s) }, border)
     end
 
-    def row(value, align : AlignValue = AlignOption::Auto, border : Border = :none)
+    def row(value, align : AlignValue = :auto, border : Border = :none)
       @rows << AutoSpanRow.new(value.to_s, align, border)
     end
 
@@ -152,7 +152,7 @@ module Tallboy
       row(arr, Border::Bottom)
     end
 
-    def header(value, align : AlignValue = AlignOption::Auto)
+    def header(value, align : AlignValue = :auto)
       row(value.to_s, align: align, border: :bottom)
     end
 
@@ -166,7 +166,7 @@ module Tallboy
       row(arr, Border::Top)
     end
 
-    def footer(value, align : AlignValue = AlignOption::Auto)
+    def footer(value, align : AlignValue = :auto)
       row(value, align, :top)
     end
 
@@ -213,8 +213,8 @@ module Tallboy
 
   record ColumnDefinition, 
     name : String = "", 
-    width : WidthValue = WidthOption::Auto, 
-    align : AlignValue = AlignOption::Auto
+    width : WidthValue = :auto, 
+    align : AlignValue = :auto
 
 
   class ColumnDefinitions
@@ -228,7 +228,7 @@ module Tallboy
     def initialize(@columns = [] of ColumnDefinition)
     end
 
-    def add(name, width : WidthValue = WidthOption::Auto, align : AlignValue = AlignOption::Auto)
+    def add(name, width : WidthValue = WidthOption::Auto, align : AlignValue = :auto)
       @columns << ColumnDefinition.new(name, width, align)
     end
 

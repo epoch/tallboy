@@ -228,7 +228,9 @@ puts(
 )
 ```
 
-9. Most components in tallboy can be invoked separately. The design philosophy is inspired by how web browsers renders HTML.
+## How it works
+
+Most components in tallboy can be invoked separately. The design philosophy is inspired by how web browsers renders HTML.
 
 ```
 ┌───────────────────────────────────────────────────────────┐
@@ -245,7 +247,7 @@ data = [
   [4,5,6]
 ]
 
-# TableBuilder is the DSL that returns an ojbect model
+# TableBuilder is the DSL that returns an object model
 table_object_model = Tallboy::TableBuilder.new do 
   rows(data)
 end

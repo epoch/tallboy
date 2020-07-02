@@ -1,6 +1,6 @@
 # tallboy
 
-Generate pretty ASCII, Unicode & Markdown tables on the terminal for your command line programs. 
+Generate pretty **Unicode**, **ASCII** or **Markdown** tables on the terminal for your command line programs. 
 
 [tallboy](https://github.com/epoch/tallboy) is a DSL for quickly creating text based tables in [Crystal](https://crystal-lang.org/).
 
@@ -74,7 +74,7 @@ puts table
 │    10.2 kB │ delete      │ /dishes/:id │
 └────────────┴─────────────┴─────────────┘
 
-# look at those beautiful table joins!
+# draw border joints correctly even with different span sizes :)
 ```
 
 ## Top Features
@@ -83,8 +83,8 @@ puts table
 - simple, readable and flexible API
 - text alignment (left, right, center)
 - set width and alignment for entire columns with column definitions
-- static type checking for table declarations powered by Crystal
-- correctly handle multi-line cells with the newline character
+- static type checking for almost all DSL options
+- support multi-line cells with the newline character
 - full custom styling or choose from multiple border styles including ascii, unicode and markdown
 - render directly into IO for better performance
 
@@ -122,7 +122,7 @@ table = Tallboy.table do
 end
 ```
 
-3. add rows. you can add single row with `row` or nested arrays with `rows`. values can be strings, integers or floats.
+3. add rows. you can add single row with `row` or nested arrays with `rows`. values can be **any object that has a `to_s` method**.
 
 ```crystal
 table = Tallboy.table do
@@ -219,6 +219,8 @@ puts table.render(:markdown) # markdown does not support column spans and outer 
 8. tallboy supports rendering into custom IO
 
 ```crystal
+table.render(IO::Memory.new)
+
 puts(
   Tallboy.table do
     row [1,2,3]
@@ -243,19 +245,21 @@ data = [
   [4,5,6]
 ]
 
-# table object model
-table_object_model = Tallboy::TableBuilder.new { rows(data) }
+# TableBuilder is the DSL that returns an ojbect model
+table_object_model = Tallboy::TableBuilder.new do 
+  rows(data)
+end
 
 min_widths = Tallboy::MinWidthCalculator.new(table_object_model).calculate
 
-# object model with resolved widths
+# ComputedTableBuilder takes the object model and calculate widths for each cell 
 computed_table = Tallboy::ComputedTableBuilder.new(table_object_model, min_widths).build
 
-# render tree
+# RenderTreeBuilder work out borders, spans and organize into nodes to rendering
 render_tree = Tallboy::RenderTreeBuilder.new(computed_table).build
 
-# text
-str = Tallboy::Renderer.new(render_tree).render
+# render into output with unicode border style
+output_string = Tallboy::Renderer.new(render_tree).render
 
 ```
 

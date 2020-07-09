@@ -213,7 +213,26 @@ end
 ```crystal
 puts table.render # defaults to unicode
 puts table.render(:ascii) # classic look
-puts table.render(:markdown) # markdown does not support column spans and outer edge borders
+
+# markdown does not support column spans and outer edge borders
+# turning off top and bottom border with border set to `:none`
+
+table = Tallboy.table(border: :none) do
+  header ["name", "hex"]
+  row ["mistyrose",       "#ffe4e1"]
+  row ["darkolivegreen",  "#556b2f"]
+  row ["papayawhip",      "#ffefd5"]
+end
+
+puts table.render(:markdown) 
+```
+
+```
+| name           | hex     |
+|----------------|---------|
+| mistyrose      | #ffe4e1 |
+| darkolivegreen | #556b2f |
+| papayawhip     | #ffefd5 |
 ```
 
 8. tallboy supports rendering into custom IO

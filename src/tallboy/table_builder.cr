@@ -83,7 +83,9 @@ module Tallboy
         @columns = ColumnDefinitions.new(@rows.map(&.size).max)
       end
 
-      raise "invalid row cell size" unless @rows.select(&.is_a?(Row)).all? {|r| r.size == @columns.size}
+      if @rows.select(&.is_a?(Row)).any? { |r| r.size != @columns.size}
+        raise UnevenRowLength.new 
+      end
 
       RenderTreeBuilder.new(
         ComputedTableBuilder.new(

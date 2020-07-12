@@ -1,3 +1,4 @@
+require "./tallboy/exception/*"
 require "./tallboy/*"
 require "./tallboy/renderer"
 require "./tallboy/renderer/*"

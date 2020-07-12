@@ -102,6 +102,36 @@ describe Tallboy do
     IO
 
     table.to_s.should eq(output)    
-  end  
+  end
+  
+  it "draws markdown table" do
+    table = Tallboy.table(border: :none) do
+      header ["time", "activity"]
+      row ["8:00 am", "breakfast"]
+      row ["1:00 pm", "lunch"]
+      row ["7:00 pm", "dinner"]
+    end
+
+    output = <<-IO
+    | time    | activity  |
+    |---------|-----------|
+    | 8:00 am | breakfast |
+    | 1:00 pm | lunch     |
+    | 7:00 pm | dinner    |
+    IO
+
+    table.render(:markdown).to_s.should eq(output)
+  end
+
+  it "throws uneven columns execption" do
+    table = Tallboy.table do
+      row ["one"]
+      row ["one", "two"]
+    end
+
+    expect_raises Tallboy::UnevenRowLength do
+      table.render
+    end
+  end
 
 end

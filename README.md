@@ -278,13 +278,13 @@ computed_table = Tallboy::ComputedTableBuilder.new(table_object_model).build
 render_tree = Tallboy::RenderTreeBuilder.new(computed_table).build
 
 # render into output with unicode border style
-output_string = Tallboy::Renderer.new(render_tree).render
+io = Tallboy::Renderer.new(render_tree).render
 
 ```
 
 ## API
 
-more examples in the examples folder 
+for more examples checkout `tallboy_spec.cr`
 
 ## Contributing
 

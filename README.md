@@ -274,7 +274,7 @@ end
 min_widths = Tallboy::MinWidthCalculator.new(table_object_model).calculate
 
 # ComputedTableBuilder takes the object model and calculate widths for each cell 
-computed_table = Tallboy::ComputedTableBuilder.new(table_object_model, min_widths).build
+computed_table = Tallboy::ComputedTableBuilder.new(table_object_model).build
 
 # RenderTreeBuilder work out borders, spans and organize into nodes to rendering
 render_tree = Tallboy::RenderTreeBuilder.new(computed_table).build

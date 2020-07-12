@@ -110,10 +110,7 @@ module Tallboy
       end
 
       RenderTreeBuilder.new(
-        ComputedTableBuilder.new(
-          self, 
-          MinWidthCalculator.new(self).calculate
-        ).build
+        ComputedTableBuilder.new(self).build
       ).build
     end
     

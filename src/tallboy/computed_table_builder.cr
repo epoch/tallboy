@@ -2,9 +2,11 @@ require "./computed_table_builder/*"
 
 module Tallboy
   class ComputedTableBuilder
+    @min_widths : Array(Int32)
     getter :min_widths
 
-    def initialize(@table : TableBuilder, @min_widths : Array(Int32))
+    def initialize(@table : TableBuilder)
+      @min_widths = MinWidthCalculator.new(@table).calculate
     end
 
     def build

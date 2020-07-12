@@ -271,8 +271,6 @@ table_object_model = Tallboy::TableBuilder.new do
   rows(data)
 end
 
-min_widths = Tallboy::MinWidthCalculator.new(table_object_model).calculate
-
 # ComputedTableBuilder takes the object model and calculate widths for each cell 
 computed_table = Tallboy::ComputedTableBuilder.new(table_object_model).build
 

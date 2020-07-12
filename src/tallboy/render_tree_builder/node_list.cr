@@ -19,26 +19,4 @@ module Tallboy
       @nodes.each {|n| yield n }
     end
   end
-
-  class MinWidthCalculator
-    def initialize(@table : TableBuilder)
-    end
-
-    def calculate
-      @table.columns.map_with_index do |_, idx|
-        column(idx).max? ? column(idx).max + PADDING_LEFT + PADDING_RIGHT : 0
-      end
-    end
-
-    private def column(idx)
-      @table.map do |row| 
-        case row
-        when Row
-          row[idx].size 
-        else
-          (row.value.to_s.size / @table.columns.size).ceil.to_i
-        end
-      end
-    end    
-  end
 end

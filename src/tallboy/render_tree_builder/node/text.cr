@@ -1,21 +1,23 @@
 module Tallboy
   struct Text
-    getter :value, :align, :width
+    delegate value, to: @cell
+    delegate width, to: @cell
+    delegate align, to: @cell
 
-    def self.new(cell : ComputedCell)
-      new(cell.value.to_s, cell.width, cell.align)
-    end
-
-    def initialize(@value : String, @width : Int32, @align : Alignment)
+    def initialize(@cell : ComputedCell)
       @type = "text"
     end
 
     def value(line_num)
-      @value.split("\n")[line_num]? || " " * @value.size 
+      value.lines[line_num]? || blank_line
     end
 
     def height
-      @value.split("\n").size
+      value.lines.size
+    end
+
+    def blank_line
+      " " * value.size 
     end
 
     def with_padding(value)
@@ -24,19 +26,25 @@ module Tallboy
       end
     end
 
-    def with_align(value, align, width)
+    def with_align(text, align, width)
+      width += escaped_codes_size(text)
+
       case align
       when Alignment::Right
-        value.rjust(width)
+        text.rjust(width)
       when Alignment::Left
-        value.ljust(width)
+        text.ljust(width)
       when Alignment::Center
-        value.center(width)
+        text.center(width)
       end
     end
 
     def render(line_num : Int32 = 0)
-      with_align(with_padding(value(line_num)), @align, @width)
+      with_align(with_padding(value(line_num)), align, width)
+    end
+
+    private def escaped_codes_size(text)
+      text.size - text.gsub(/\e\[[0-9;]*m/, "").size
     end
 
     def inspect

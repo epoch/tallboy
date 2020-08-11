@@ -19,7 +19,7 @@ module Tallboy
     end
 
     def size
-      @value.size
+      @value.gsub(/\e\[[0-9;]*m/, "").size
     end
   end
 end

@@ -4,7 +4,7 @@ require "./tallboy/renderer"
 require "./tallboy/renderer/*"
 
 module Tallboy
-  VERSION = "0.9.1"
+  VERSION = "0.9.3"
 
   PADDING_LEFT = 1
   PADDING_RIGHT = 1

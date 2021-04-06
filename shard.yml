@@ -1,9 +1,9 @@
 name: tallboy
-version: 0.9.2
+version: 0.9.3
 
 authors:
   - Daniel Tsui <tsui.daniel@gmail.com>
 
-crystal: 0.35.1
+crystal: ">= 0.35.1, < 2.0.0"
 
 license: MIT
